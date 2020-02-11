@@ -11,6 +11,13 @@
 #include "command_line_helpers.h"
 #include "handeyecalibrationbuilder.h"
 #include "handeyecalibration_utils.h"
+using namespace std;
+
+void cout_indented(int n_space, const string& str)
+{
+    if(n_space >= 0) std::cout << std::string(n_space * 2, ' ') << str << std::endl;
+    }
+
 
 // Input/output files.
 DEFINE_string(images, "", "Wildcard of images to reconstruct.");
@@ -368,7 +375,9 @@ int main(int argc, char *argv[])
 
     Timer timer;
     timer.Reset();
+    cout_indented(0, "BBB");
     HandEyeCalibrationBuilder reconstruction_builder(options);
+    cout_indented(0, "CCC");   // exit(0);
 
     // If matches are provided, load matches otherwise load images.
     if (FLAGS_matches_file.size() != 0)
