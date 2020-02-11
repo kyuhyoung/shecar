@@ -2,6 +2,7 @@
 #define TYPE_H
 
 #include<Eigen/Core>
+#include<vector>
 
 typedef Eigen::Matrix4d Pose;
 //typedef std::pair<Eigen::Matrix3d, Eigen::Vector3d> Pose;

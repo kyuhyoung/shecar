@@ -5,7 +5,6 @@ We present a novel pipeline for hand-eye calibration which combines classical ha
 The accompyniying dataset is located at: https://robotics.shanghaitech.edu.cn/datasets/shecar 
 
 
-
 # Dependencies
 1. [Theia]. This project highly depends on Theia. It is worthy mentioning that we are not using the mainstream of theia, to make it easy to reuse, we modify the original code a little, so please be sure you are using the code provided here. After you install Theia successfully, you should compile this project without any trouble.
 
