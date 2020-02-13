@@ -14,7 +14,7 @@
 # The calibration file indicates possibly known calibration e.g, from EXIF or
 # explicit calibration. Theia attempts to extract EXIF focal lengths if calibration
 # is not supplied for a given image.
---calibration_file=data/monocular/intrinsic.txt
+#--calibration_file=data/monocular/intrinsic.txt
 --output_reconstruction=data/monocular/output
 
 ############### Multithreading ###############

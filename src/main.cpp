@@ -290,7 +290,7 @@ void AddMatchesToReconstructionBuilder(
 }
 
 void AddImagesToReconstructionBuilder(
-    ReconstructionBuilder* reconstruction_builder)
+    ReconstructionBuilder* reconstruction_builder, int n_sp)
 {
     std::vector<std::string> image_files;
     CHECK(theia::GetFilepathsFromWildcard(FLAGS_images, &image_files))
@@ -304,9 +304,11 @@ void AddImagesToReconstructionBuilder(
     camera_intrinsics_prior;
     if (FLAGS_calibration_file.size() != 0)
     {
+        cout_indented(n_sp + 1, "FLAGS_calibration_file : " + FLAGS_calibration_file);
         CHECK(theia::ReadCalibration(FLAGS_calibration_file,
                                      &camera_intrinsics_prior))
                 << "Could not read calibration file.";
+        //exit(0);          
     }
 
     // Add images with possible calibration. When the intrinsics group id is
@@ -361,6 +363,21 @@ int main(int argc, char *argv[])
     uint count = 0;
     while (getline(indata, line))
     {
+
+//  Pose
+
+//  [r11 r12 r13 tx]
+//  [r21 r22 r23 ty]
+//  [r31 r32 r33 tz]
+//  [0   0   0   1 ]
+
+//  In handposes.txt
+
+//  r11 r21 r31 r12 r22 r32 r13 r23 r33 tx ty tz # for image 1
+//  r11 r21 r31 r12 r22 r32 r13 r23 r33 tx ty tz # for image 2
+//  ...
+//  r11 r21 r31 r12 r22 r32 r13 r23 r33 tx ty tz # for image N
+
         std::stringstream lineStream(line);
         std::string cell;
         Pose pose = Pose::Identity(4,4);
@@ -372,6 +389,8 @@ int main(int argc, char *argv[])
         }
         handposes.push_back(pose);
     }
+
+
 
     Timer timer;
     timer.Reset();
@@ -386,7 +405,7 @@ int main(int argc, char *argv[])
     }
     else if (FLAGS_images.size() != 0)
     {
-        AddImagesToReconstructionBuilder(&reconstruction_builder);
+        AddImagesToReconstructionBuilder(&reconstruction_builder, 0);
     }
     else
     {
