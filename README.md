@@ -6,8 +6,8 @@ The accompyniying dataset is located at: https://robotics.shanghaitech.edu.cn/da
 
 
 # Dependencies
-1. [Theia]. 
-You need this library. But you will get troubles if you download the original "Theia". Please use my version here (https://github.com/kyuhyoung/TheiaSfM) in orer not to have build problems. 
+1. [Theia] </br>
+You need this library. But you will get troubles if you download the original "Theia". Please use my version here (https://github.com/kyuhyoung/TheiaSfM) in orer not to have build problems. </br> 
 This project highly depends on Theia. It is worthy mentioning that we are not using the mainstream of theia, to make it easy to reuse, we modify the original code a little, so please be sure you are using the code provided here. After you install Theia successfully, you should compile this project without any trouble.
 
 # How to run
