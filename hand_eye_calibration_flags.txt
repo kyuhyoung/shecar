@@ -17,6 +17,13 @@
 #--calibration_file=data/monocular/intrinsic.txt
 --output_reconstruction=data/monocular/output
 
+############### Added by kyuhyoung ##################
+--chessboard_nx=8
+--chessboard_ny=6
+--cell_mm=28
+######################################################
+
+
 ############### Multithreading ###############
 # Set to the number of threads you want to use.
 --num_threads=8

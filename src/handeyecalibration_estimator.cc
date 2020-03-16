@@ -90,7 +90,7 @@ ReconstructionEstimatorSummary HandEyeCalibrationEstimator::Estimate(
 
     // Step 1. Filter the initial view graph and remove any bad two view
     // geometries.
-    LOG(INFO) << "Filtering the intial view graph.";
+    LOG(INFO) << "Filtering the inial view graph.";
     timer.Reset();
     if (!FilterTooFewerInlierViewPair())
     {

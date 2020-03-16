@@ -15,6 +15,7 @@ file(GLOB SHECAR_SRC
 
 find_package(Theia REQUIRED )
 
+
 # Eigen
 set(MIN_EIGEN_VERSION 3.2.0)
 find_package(Eigen3 ${MIN_EIGEN_VERSION} REQUIRED)
@@ -35,6 +36,20 @@ else (CERES_FOUND)
     "CERES_LIBRARY")
 endif (CERES_FOUND)
 
+
+# OpenCV
+message("-- Check for OpenCV")
+find_package(OpenCV REQUIRED)
+if (OpenCV_FOUND)
+  message("-- Found OpenCV: ${OpenCV_INCLUDE_DIRS}")
+else (OpenCV_FOUND)
+  message(FATAL_ERROR "Can't find OpenCV. Please set OpenCV_INCLUDE_DIR & "
+    "OpenCV_LIBS")
+endif (OpenCV_FOUND)
+
+
+
+
 include_directories(
   ${THEIA_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
@@ -48,5 +63,6 @@ target_link_libraries(SHECAR
   ${THEIA_LIBRARIES}
   ${EIGEN_LIBRARIES}
   ${CERES_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 

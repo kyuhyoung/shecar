@@ -1,3 +1,10 @@
+#define COMPARE_2_OPENCV
+
+#ifdef COMPARE_2_OPENCV
+#include "opencv2/opencv.hpp"
+#include <opencv2/calib3d.hpp>
+using namespace cv;
+#endif  //  COMPARE_2_OPENCV
 
 #include <glog/logging.h>
 #include <gflags/gflags.h>
@@ -24,6 +31,14 @@ DEFINE_string(images, "", "Wildcard of images to reconstruct.");
 DEFINE_string(matches_file, "", "Filename of the matches file.");
 DEFINE_string(calibration_file, "",
               "Calibration file containing image calibration data.");
+DEFINE_int32(chessboard_nx, -1,
+             "Number of grids in X direction of chessboard.");
+
+DEFINE_int32(chessboard_ny, -1,
+             "Number of grids in Y direction of chessboard.");
+DEFINE_double(cell_mm, -1.0,
+             "length of chessboard grid in millimeter.");
+
 DEFINE_string(hand_poses_file, "",
               "hand poses file containing hand poses");
 DEFINE_string(
@@ -344,12 +359,81 @@ void AddImagesToReconstructionBuilder(
     CHECK(reconstruction_builder->ExtractAndMatchFeatures());
 }
 
+#ifdef COMPARE_2_OPENCV
+Mat handeye_opencv(const vector<string>& li_fn, const Size& patternsize, float cell_size, int n_sp)
+{
+    cout_indented(n_sp, "handeye_opencv START");
+    Mat pose_cam_2_gripper, rvec(3, 1, CV_32F), tvec(3, 1, CV_32F), cameraMatrix(3, 3, CV_32FC1);
+    int num_images = li_fn.size();
+    vector<double> distortionCoefficients(5);
+    vector<Point3f> obj_points;
+    vector<Point2f> centers;
+    //Size patternsize(6, 8); //number of centers
+    std::vector<Mat> R_target2cam, t_target2cam;
+    for (int i = 0; i < patternsize.height; ++i)
+        for (int j = 0; j < patternsize.width; ++j)
+            obj_points.push_back(Point3f(float(j*cell_size), float(i*cell_size), 0.f));
+
+    for (size_t iI = 0; iI < num_images; iI++)
+    {
+        Mat frame = imread(li_fn[iI]); //source image
+        bool patternfound = findChessboardCorners(frame, patternsize, centers);
+        if (patternfound)
+        {
+            drawChessboardCorners(frame, patternsize, Mat(centers), patternfound);
+                                                                //imshow("window", frame);
+                                                                            //int key = cv::waitKey(0) & 0xff;
+                
+            solvePnP(Mat(obj_points), Mat(centers), cameraMatrix, distortionCoefficients, rvec, tvec);
+            Mat R;
+            Rodrigues(rvec, R); // R is 3x3
+            R_target2cam.push_back(R);
+            t_target2cam.push_back(tvec);
+            Mat T = Mat::eye(4, 4, R.type()); // T is 4x4
+            T(Range(0, 3), Range(0, 3)) = R * 1; // copies R into T
+            T(Range(0, 3), Range(3, 4)) = tvec * 1; // copies tvec into T
+                
+            cout << "T = " << endl << " " << T << endl << endl;
+
+        }
+        //cout << patternfound << endl;
+        cout_indented(n_sp + 1, "iI : " + to_string(iI) + " / " + to_string(num_images) + " : patternfound = " + to_string(patternfound));
+    }
+   
+    //Mat R_cam2gripper = (Mat_<float>(3, 3)), t_cam2gripper = (Mat_<float>(3, 1));
+    Mat R_cam2gripper, t_cam2gripper;
+
+    calibrateHandEye(R_gripper2base, t_gripper2base, R_target2cam, t_target2cam, R_cam2gripper, t_cam2gripper, CALIB_HAND_EYE_TSAI);
+
+    cout_indented(n_sp, "handeye_opencv END");
+    return pose_cam_2_gripper;
+}    
+#endif  //  COMPARE_2_OPENCV
+
+
 int main(int argc, char *argv[])
 {
-
+    printf("argc b4 : %d\nargv b4 : ", argc);
+    for(int i = 0; i < argc; i++) printf("%s ", argv[i]);    printf("\n");
     google::ParseCommandLineFlags(&argc, &argv, true);
+    printf("argc after : %d\nargv after : ", argc);
+    for(int i = 0; i < argc; i++) printf("%s ", argv[i]);    printf("\n");
+    //exit(0);   
     google::InitGoogleLogging(argv[0]);
-    cout<<FLAGS_output_reconstruction.size()<<endl;
+#ifdef COMPARE_2_OPENCV
+    std::vector<std::string> image_files;
+    CHECK(theia::GetFilepathsFromWildcard(FLAGS_images, &image_files))
+            << "Could not find images that matched the filepath: " << FLAGS_images
+            << ". NOTE that the ~ filepath is not supported.";
+    CHECK_GT(image_files.size(), 0) << "No images found in: " << FLAGS_images;
+    Mat pose_cam_2_gripper = handeye_opencv(image_files, Size(FLAGS_chessboard_nx, FLAGS_chessboard_ny), FLAGS_cell_mm, 1);
+    exit(0);
+#endif  //  COMPARE_2_OPENCV
+#if 0    
+    cout << "FLAGS_output_reconstruction.size() : " << FLAGS_output_reconstruction.size() << endl;
+    cout << "FLAGS_output_reconstruction : " << FLAGS_output_reconstruction << endl;
+    exit(0);
+#endif    
     CHECK_GT(FLAGS_output_reconstruction.size(), 0)
             << "Must specify a filepath to output the reconstruction.";
 
@@ -429,5 +513,4 @@ int main(int argc, char *argv[])
     Eigen::IOFormat fmt;
     fmt.precision = Eigen::FullPrecision;
     cout<<"Estimated hand-eye transform:"<<handeyetrans.GetHandEyeRotationAsRotationMatrix().format(fmt)<<std::endl<<handeyetrans.GetHandEyeTranslation().format(fmt)<<endl;
-
 }
