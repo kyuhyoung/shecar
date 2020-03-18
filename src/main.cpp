@@ -404,7 +404,7 @@ vector<Mat> read_hand_poses_from_file(const string& hand_poses_file)
 
 
 
-
+// reference : https://answers.opencv.org/question/215449/wrong-result-in-calibratehandeye-function-answered/
 
 Mat handeye_opencv(const vector<string>& li_fn, const string& hand_poses_file, const Size& patternsize, float cell_size, int n_sp)
 {
