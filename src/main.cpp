@@ -360,9 +360,56 @@ void AddImagesToReconstructionBuilder(
 }
 
 #ifdef COMPARE_2_OPENCV
-Mat handeye_opencv(const vector<string>& li_fn, const Size& patternsize, float cell_size, int n_sp)
+
+vector<Mat> read_hand_poses_from_file(const string& hand_poses_file)
+{
+    vector<Mat> li_hand_pose;
+    std::ifstream indata;
+    indata.open(hand_poses_file);
+    std::string line;
+    //Poses handposes;
+    uint count = 0;
+    while (getline(indata, line))
+    {
+
+//  Pose
+
+//  [r11 r12 r13 tx]
+//  [r21 r22 r23 ty]
+//  [r31 r32 r33 tz]
+//  [0   0   0   1 ]
+
+//  In handposes.txt
+
+//  r11 r21 r31 r12 r22 r32 r13 r23 r33 tx ty tz # for image 1
+//  r11 r21 r31 r12 r22 r32 r13 r23 r33 tx ty tz # for image 2
+//  ...
+//  r11 r21 r31 r12 r22 r32 r13 r23 r33 tx ty tz # for image N
+
+        std::stringstream lineStream(line);
+        std::string cell;
+        Pose pose = Pose::Identity(4,4);
+        count = 0;
+        while (std::getline(lineStream, cell, ','))
+        {
+            pose(count%3,count/3) = std::stod(cell);
+            count++;
+        }
+        handposes.push_back(pose);
+    }
+
+    return li_hand_pose;
+}    
+
+
+
+
+
+
+Mat handeye_opencv(const vector<string>& li_fn, const string& hand_poses_file, const Size& patternsize, float cell_size, int n_sp)
 {
     cout_indented(n_sp, "handeye_opencv START");
+    vector<Mat> R_gripper2base, t_gripper2base;
     Mat pose_cam_2_gripper, rvec(3, 1, CV_32F), tvec(3, 1, CV_32F), cameraMatrix(3, 3, CV_32FC1);
     int num_images = li_fn.size();
     vector<double> distortionCoefficients(5);
@@ -426,7 +473,7 @@ int main(int argc, char *argv[])
             << "Could not find images that matched the filepath: " << FLAGS_images
             << ". NOTE that the ~ filepath is not supported.";
     CHECK_GT(image_files.size(), 0) << "No images found in: " << FLAGS_images;
-    Mat pose_cam_2_gripper = handeye_opencv(image_files, Size(FLAGS_chessboard_nx, FLAGS_chessboard_ny), FLAGS_cell_mm, 1);
+    Mat pose_cam_2_gripper = handeye_opencv(image_files, FLAGS_hand_poses_file, Size(FLAGS_chessboard_nx, FLAGS_chessboard_ny), FLAGS_cell_mm, 1);
     exit(0);
 #endif  //  COMPARE_2_OPENCV
 #if 0    
